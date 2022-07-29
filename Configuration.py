@@ -353,7 +353,6 @@ def showButtons():
     labelUserActivity.grid(row=12, column=1, padx=20)
     labelTrackSubmissionActivity.grid(row=12, column=2, padx=20)
 
-
 buttonSubmit = Button(root, text="Submit", command=checkCredentials, bg="cyan")
 buttonSubmit.grid(row=9, column=1)
 emptyLable = Label(root, text="")
