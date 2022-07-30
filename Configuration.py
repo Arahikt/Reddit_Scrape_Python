@@ -1,10 +1,15 @@
 from tkinter import *
 import praw
-from tkinter import scrolledtext
+from tkinter import scrolledtext, ttk
 import prawcore
+from charset_normalizer import constant
 from prawcore import NotFound, ResponseException
 from datetime import *
+
+import UserKeywordUsage
 import initialize
+import Chart
+from searchKeywordInSubreddit import searchKeyword, searchKeywordWindow
 
 
 def searchUserExists(username):
@@ -31,16 +36,17 @@ def createNewWindowKeyWordUsage():
     editor = Tk()
     editor.title('Track User Keyword Usage')
     editor.geometry("1000x600")
+    editor.configure(background="whitesmoke")
     reddit = praw.Reddit('reddit-configuration-bot1')
     userToTrackLabel = Label(editor, text="Username to Track").grid(row=0, column=0)
     usertoTrackEntry = Entry(editor, width=30, borderwidth=5)
-    usertoTrackEntry.grid(row=0, column=1)
+    usertoTrackEntry.grid(row=0, column=2)
     usertoTrackEntry.insert(0, "")
     userExistLabel = Label(editor, text="")
     userExistLabel.grid(row=1, column=0, sticky=E)
 
-    global i
-    i = 3
+    global index
+    index =4
     listWordBoxes = []
 
     def prevPage():
@@ -49,21 +55,25 @@ def createNewWindowKeyWordUsage():
         mainloop()
 
     backButton = Button(editor, text="Previous Page", command=prevPage)
-    backButton.grid(row=8, column=0)
+    backButton.grid(row=2, column=3)
 
-    def createNewTextBox(ind):
-        keyword = Entry(editor, width=30, borderwidth=5)
-        keyword.grid(row=ind, column=1)
-        keyword.insert(0, "")
-        listWordBoxes.append(keyword)
-        global i
-        i += 1
+    def createNewTextBox(count):
+        MAX_NUM = 8
+        if count <= MAX_NUM:
+            keyword = Entry(editor, width=30, borderwidth=5)
+            keyword.grid(row=count, column=2)
+            keyword.insert(0, "")
+            listWordBoxes.append(keyword)
+            global index
+            count +=1
+            index +=1
 
     def executeTracking():
         wordsDict = {}
         for w in listWordBoxes:
             wordsDict[str(w.get())] = 0
-
+        username = usertoTrackEntry.get()
+        UserKeywordUsage.TrackUserKeywordUsage(wordsDict,username)
     def executeUserTracking():
         if (len(usertoTrackEntry.get()) != 0):
             userExists = searchUserExists(str(usertoTrackEntry.get()))
@@ -77,13 +87,12 @@ def createNewWindowKeyWordUsage():
     searchButtonUser = Button(editor, text="Search user", command=executeUserTracking)
     searchButtonUser.grid(row=2, column=1, sticky=W)
 
-    buttonKeywordUsage = Button(editor, text="+",
-                                command=lambda: createNewTextBox(i)).grid(row=2, column=0)
+    Button(editor, text="+",command= lambda: createNewTextBox(index)).grid(row=3, column=1)
 
-    buttonExecuteTracking = Button(editor, text="Track Keywords:",
-                                   command=executeTracking).grid(row=2, column=5)
+    Button(editor, text="Track Keywords:",
+                                   command=executeTracking).grid(row=2, column=2)
 
-    editor.destroy()
+    # editor.destroy()
 
 
 def createNewWindowActivityTracking():
@@ -92,6 +101,7 @@ def createNewWindowActivityTracking():
     editor = Tk()
     editor.title('Track User Activity')
     editor.geometry("650x750")
+    editor.configure(background="whitesmoke")
 
     reddit = praw.Reddit('reddit-configuration-bot1')
     userToTrack = Label(editor, text="Username To Track:").grid(row=0, column=0, sticky=E, pady=15, padx=15)
@@ -229,6 +239,7 @@ def createNewWindowTrackUserActivityOverTime():
     editor = Tk()
     editor.title('Track User Activity Over Time')
     editor.geometry("530x520")
+    editor.configure(background="white smoke")
     reddit = praw.Reddit('reddit-configuration-bot1')
 
     userToTrack = Label(editor, text="Username To Track:").grid(row=0, column=0, sticky=E, pady=15, padx=15)
@@ -282,7 +293,7 @@ def createNewWindowTrackUserActivityOverTime():
     text_area_frame = Frame(editor)
     text_area_frame.grid(row=5, column=0, columnspan=2)
 
-    text_area = scrolledtext.ScrolledText(text_area_frame, width=60, height=19)
+    text_area = scrolledtext.ScrolledText(text_area_frame, width=60, height=19, bg="Alice blue")
     text_area.grid(row=0, column=0, pady=15, padx=15)
 
 
@@ -290,32 +301,33 @@ def createNewWindowTrackUserActivityOverTime():
 
 root = Tk()
 root.title('User Behaviour Tracking on Reddit')
-root.geometry("600x400")
+root.geometry("510x400")
+# root.configure(background="white")
 
-clientIdLabel = Label(root, text="Enter Client ID:").grid(row=1, column=0)
+clientIdLabel = Label(root, text="Enter Client ID:").grid(row=1, column=0,padx=20)
 clientIdEntry = Entry(root, width=30, borderwidth=5)
 clientIdEntry.grid(row=1, column=1)
 clientIdEntry.insert(0, initialize.clientID)
 clientIdEntry.config(show="*")
 
-clientSecretLabel = Label(root, text="Enter Client Secret:").grid(row=2, column=0)
+clientSecretLabel = Label(root, text="Enter Client Secret:").grid(row=2, column=0,padx=20)
 clientSecretEntry = Entry(root, width=30, borderwidth=5)
 clientSecretEntry.grid(row=2, column=1)
 clientSecretEntry.insert(0, initialize.clientSecret)
 clientSecretEntry.config(show="*")
 
-usernameLabel = Label(root, text="Enter Username:").grid(row=3, column=0)
+usernameLabel = Label(root, text="Enter Username:").grid(row=3, column=0,padx=20)
 usernameEntry = Entry(root, width=30, borderwidth=5)
 usernameEntry.grid(row=3, column=1)
 usernameEntry.insert(0, initialize.username)
 
-passwordLabel = Label(root, text="Enter Password:").grid(row=4, column=0)
+passwordLabel = Label(root, text="Enter Password:").grid(row=4, column=0,padx=20)
 passwordEntry = Entry(root, width=30, borderwidth=5)
 passwordEntry.grid(row=4, column=1)
 passwordEntry.insert(0, initialize.password)
 passwordEntry.config(show="*")
 
-userAgentLabel = Label(root, text="Enter User Agent:").grid(row=5, column=0)
+userAgentLabel = Label(root, text="Enter User Agent:").grid(row=5, column=0,padx=20)
 userAgentEntry = Entry(root, width=30, borderwidth=5)
 userAgentEntry.grid(row=5, column=1)
 userAgentEntry.insert(0, initialize.userAgent)
@@ -337,35 +349,47 @@ def checkCredentials():
             showButtons()
             return True
         except prawcore.OAuthException:
-            emptyLable.configure(text="Please enter correct credentials!!", fg="#AEB6BF")
+            emptyLable.configure(text="Please enter correct credentials!!")
             return False
         except ResponseException:
-            emptyLable.configure(text="Please enter correct credentials!!", fg="#AEB6BF")
+            emptyLable.configure(text="Please enter correct credentials!!")
             return False
     else:
-        emptyLable.configure(text="Please enter the fields!!", fg="#AEB6BF")
+        emptyLable.configure(text="Please enter the fields!!")
 
 def showButtons():
     buttonKeywordUsage.grid(row=13, column=0)
     buttonUserActivity.grid(row=13, column=1)
     buttonSubmissionActivity.grid(row=13, column=2)
-    labelKeywordUsage.grid(row=12, column=0, padx=20)
-    labelUserActivity.grid(row=12, column=1, padx=20)
-    labelTrackSubmissionActivity.grid(row=12, column=2, padx=20)
+    buttonKeywordSearch.grid(row= 15,column=0, pady=10)
+    # labelKeywordUsage.grid(row=12, column=0, padx=20)
+    # labelUserActivity.grid(row=12, column=1, padx=20)
+    # labelTrackSubmissionActivity.grid(row=12, column=2, padx=20)
 
-buttonSubmit = Button(root, text="Submit", command=checkCredentials, bg="cyan")
+# style = ttk.Style()
+# style.configure("Bg.TLabel", foreground="black", background="white")
+ttk.Style().configure("TButton", padding=6, relief="flat",
+   background="#ccc")
+
+style = ttk.Style()
+style.map("C.TButton",
+    foreground=[('pressed', 'red'), ('active', 'blue')],
+    background=[('pressed', '!disabled', 'black'), ('active', 'white')]
+    )
+
+buttonSubmit = ttk.Button(root, text="Submit", command=checkCredentials, style="TButton")
 buttonSubmit.grid(row=9, column=1)
-emptyLable = Label(root, text="")
+emptyLable =Label(root, text="")
 emptyLable.grid(row=10, column=0)
 emptyLable1 = Label(root, text="")
 emptyLable1.grid(row=11, column=0)
 
-labelKeywordUsage = Label(root, text="Track User Keyword Usage")
-labelUserActivity = Label(root, text="Track User Activity in Subreddit")
-labelTrackSubmissionActivity = Label(root, text="Track User Activity Over Time")
+# labelKeywordUsage = Label(root, text="Track User\n Keyword Usage")
+# labelUserActivity = Label(root, text="Track User\n Activity in Subreddit")
+# labelTrackSubmissionActivity = Label(root, text="Track User Activity\n Over Time")
 
-buttonKeywordUsage = Button(root, text="Search!", command=createNewWindowKeyWordUsage, bg="brown")
-buttonUserActivity = Button(root, text="Search!", command=createNewWindowActivityTracking, bg="brown")
-buttonSubmissionActivity = Button(root, text="Search!", command=createNewWindowTrackUserActivityOverTime, bg="brown")
-
+buttonKeywordUsage = ttk.Button(root, text="Keyword Usage", command=createNewWindowKeyWordUsage, style="C.TButton")
+buttonUserActivity = ttk.Button(root, text="Subreddit Activity", command=createNewWindowActivityTracking,style="C.TButton")
+buttonSubmissionActivity = ttk.Button(root, text="Track User", command=createNewWindowTrackUserActivityOverTime, style="C.TButton", width=15)
+buttonKeywordSearch = ttk.Button(root, text="Keyword Search", command=searchKeywordWindow, style="C.TButton", width=15)
 root.mainloop()
