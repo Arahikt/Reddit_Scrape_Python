@@ -2,14 +2,12 @@ from tkinter import *
 import praw
 from tkinter import scrolledtext, ttk
 import prawcore
-from charset_normalizer import constant
 from prawcore import NotFound, ResponseException
 from datetime import *
-
 import UserKeywordUsage
 import initialize
-import Chart
-from searchKeywordInSubreddit import searchKeyword, searchKeywordWindow
+
+from searchKeywordInSubreddit import searchKeywordWindow
 
 
 def searchUserExists(username):
@@ -92,7 +90,6 @@ def createNewWindowKeyWordUsage():
     Button(editor, text="Track Keywords:",
                                    command=executeTracking).grid(row=2, column=2)
 
-    # editor.destroy()
 
 
 def createNewWindowActivityTracking():
